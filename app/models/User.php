@@ -55,5 +55,14 @@ class User {
         $stmt->execute();
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
+
+    public function update($userId, $username, $email) {
+        $query = "UPDATE " . $this->table . " SET username = :username, email = :email WHERE id = :id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':username', $username);
+        $stmt->bindParam(':email', $email);
+        $stmt->bindParam(':id', $userId);
+        return $stmt->execute();
+    }
 }
 ?>

@@ -17,5 +17,24 @@ class CommentController {
     public function deleteComment($comment_id, $user_id) {
         return $this->commentModel->delete($comment_id, $user_id);
     }
+
+    public function hasUserLikedComment($comment_id, $user_id) {
+        return $this->commentModel->hasUserLikedComment($comment_id, $user_id);
+    }
+
+    public function incrementLikes($comment_id, $user_id) {
+        return $this->commentModel->incrementLikes($comment_id, $user_id);
+    }
+
+    public function decrementLikes($comment_id, $user_id) {
+        return $this->commentModel->decrementLikes($comment_id, $user_id);
+    }
+
+    public function getLikes($id) {
+        return $this->commentModel->getLikes($id);
+    }
+
+    public function getRepliesCount($id) {
+        return $this->commentModel->getRepliesCount($id);
+    }
 }
-?>

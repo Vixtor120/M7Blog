@@ -4,9 +4,7 @@ if (session_status() == PHP_SESSION_NONE) {
 }
 require_once __DIR__ . '/../../config/Database.php';
 require_once __DIR__ . '/../../models/Post.php';
-require_once __DIR__ . '/../../models/Topic.php';
 require_once __DIR__ . '/../../controllers/PostController.php';
-require_once __DIR__ . '/../../controllers/TopicController.php';
 require_once __DIR__ . '/../../utils/Auth.php';
 
 use config\Database;
@@ -19,9 +17,7 @@ if (!Auth::isLoggedIn()) {
 
 $db = new Database();
 $postModel = new \models\Post($db->getConnection());
-$topicModel = new \models\Topic($db->getConnection());
 $postController = new \controllers\PostController($postModel);
-$topicController = new \controllers\TopicController($topicModel);
 
 // Fetch topics for the dropdown
 $query = "SELECT id, name FROM topics";
@@ -29,8 +25,16 @@ $stmt = $db->getConnection()->prepare($query);
 $stmt->execute();
 $topics = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+if (isset($_GET['post_id'])) {
+    $post = $postController->getPostById($_GET['post_id']);
+    if (!$post || $post['author_id'] != $_SESSION['user']['id']) {
+        header('Location: ../home/index.php');
+        exit();
+    }
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $image_url = null;
+    $image_url = $post['image_url'];
     if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
         $image_name = basename($_FILES['image']['name']);
         $user_id = $_SESSION['user']['id'];
@@ -47,23 +51,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    $topic_id = isset($_POST['topic_id']) ? $_POST['topic_id'] : null;
-    $new_topic_name = isset($_POST['new_topic']) ? $_POST['new_topic'] : null;
-
-    if ($new_topic_name) {
-        $topic_id = $topicController->createTopic($new_topic_name);
-    }
-
-    if ($topic_id) {
-        $postId = $postController->createPost($_POST['title'], $_POST['content'], $_SESSION['user']['id'], $topic_id, $image_url);
-        if ($postId) {
-            header("Location: details.php?post_id=$postId");
-            exit();
-        } else {
-            $error = "Error al crear el post.";
-        }
+    $updated = $postController->updatePost($_GET['post_id'], $_POST['title'], $_POST['content'], $_POST['topic_id'], $image_url);
+    if ($updated) {
+        header("Location: details.php?post_id=" . $_GET['post_id']);
+        exit();
     } else {
-        $error = "Debe seleccionar o crear un tema.";
+        $error = "Error al actualizar el post.";
     }
 }
 ?>
@@ -73,7 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crear Nuevo Post de Videojuegos</title>
+    <title>Editar Post de Videojuegos</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
 <body class="bg-gray-900 text-white">
@@ -98,38 +91,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </ul>
         </nav>
 
-        <h1 class="text-4xl font-bold mb-4">Crear Nuevo Post de Videojuegos</h1>
+        <h1 class="text-4xl font-bold mb-4">Editar Post de Videojuegos</h1>
         <form method="POST" action="" enctype="multipart/form-data" class="bg-gray-800 p-6 rounded-lg shadow-lg">
             <div class="mb-4">
                 <label for="title" class="block text-sm font-medium text-gray-300">Título:</label>
-                <input type="text" id="title" name="title" class="mt-1 p-2 w-full bg-gray-700 text-white rounded-md" required>
+                <input type="text" id="title" name="title" class="mt-1 p-2 w-full bg-gray-700 text-white rounded-md" value="<?php echo htmlspecialchars($post['title']); ?>" required>
             </div>
             <div class="mb-4">
                 <label for="content" class="block text-sm font-medium text-gray-300">Contenido:</label>
-                <textarea id="content" name="content" class="mt-1 p-2 w-full bg-gray-700 text-white rounded-md" required></textarea>
+                <textarea id="content" name="content" class="mt-1 p-2 w-full bg-gray-700 text-white rounded-md" required><?php echo htmlspecialchars($post['content']); ?></textarea>
             </div>
             <div class="mb-4">
                 <label for="image" class="block text-sm font-medium text-gray-300">Imagen:</label>
                 <input type="file" id="image" name="image" class="mt-1 p-2 w-full bg-gray-600 text-white rounded-md">
+                <?php if ($post['image_url']): ?>
+                    <img src="../<?php echo htmlspecialchars($post['image_url']); ?>" alt="Post Image" class="mt-4">
+                <?php endif; ?>
             </div>
             <div class="mb-4">
                 <label for="topic_id" class="block text-sm font-medium text-gray-300">Tema:</label>
-                <select id="topic_id" name="topic_id" class="mt-1 p-2 w-full bg-gray-700 text-white rounded-md">
-                    <option value="">Seleccionar tema existente</option>
+                <select id="topic_id" name="topic_id" class="mt-1 p-2 w-full bg-gray-700 text-white rounded-md" required>
                     <?php foreach ($topics as $topic): ?>
-                        <option value="<?php echo htmlspecialchars($topic['id']); ?>"><?php echo htmlspecialchars($topic['name']); ?></option>
+                        <option value="<?php echo htmlspecialchars($topic['id']); ?>" <?php echo $post['topic_id'] == $topic['id'] ? 'selected' : ''; ?>><?php echo htmlspecialchars($topic['name']); ?></option>
                     <?php endforeach; ?>
                 </select>
-            </div>
-            <div class="mb-4">
-                <label for="new_topic" class="block text-sm font-medium text-gray-300">O crear nuevo tema:</label>
-                <input type="text" id="new_topic" name="new_topic" class="mt-1 p-2 w-full bg-gray-700 text-white rounded-md">
             </div>
             <?php if (isset($error)): ?>
                 <p class="mt-4 text-center text-red-500"><?php echo $error; ?></p>
             <?php endif; ?>
             <div class="flex justify-end">
-                <button type="submit" name="action" value="create_post" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">Crear Post</button>
+                <button type="submit" name="action" value="update_post" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">Actualizar Post</button>
             </div>
         </form>
     </div>

@@ -3,24 +3,29 @@ if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 require_once __DIR__ . '/../../config/Database.php';
-require_once __DIR__ . '/../../models/User.php';
-require_once __DIR__ . '/../../controllers/UserController.php';
+require_once __DIR__ . '/../../models/Post.php';
+require_once __DIR__ . '/../../models/Topic.php';
+require_once __DIR__ . '/../../controllers/PostController.php';
+require_once __DIR__ . '/../../controllers/TopicController.php';
 
 use config\Database;
+use models\Post;
+use models\Topic;
+use controllers\PostController;
+use controllers\TopicController;
 
 $db = new Database();
-$userModel = new \models\User($db->getConnection());
-$userController = new \controllers\UserController($userModel);
+$postModel = new Post($db->getConnection());
+$topicModel = new Topic($db->getConnection());
+$postController = new PostController($postModel);
+$topicController = new TopicController($topicModel);
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $updated = $userController->updateProfile($_SESSION['user']['id'], $_POST['username'], $_POST['email']);
-    if ($updated) {
-        $_SESSION['user']['username'] = $_POST['username'];
-        $_SESSION['user']['email'] = $_POST['email'];
-        $success_message = "Perfil actualizado correctamente.";
-    } else {
-        $error_message = "Error al actualizar el perfil.";
-    }
+if (isset($_GET['topic_id'])) {
+    $topic = $topicController->getTopicById($_GET['topic_id']);
+    $posts = $postController->getPostsByTopicId($_GET['topic_id']);
+} else {
+    header('Location: /2DAW/m7blog/app/views/home/index.php');
+    exit();
 }
 ?>
 
@@ -29,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Perfil de Usuario</title>
+    <title>Posts de <?php echo htmlspecialchars($topic['name']); ?></title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
 <body class="bg-gray-900 text-white">
@@ -54,25 +59,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </ul>
         </nav>
 
-        <h1 class="text-4xl font-bold mb-4">Perfil de Usuario</h1>
-        <?php if (isset($success_message)): ?>
-            <p class="text-green-500 mb-4"><?php echo $success_message; ?></p>
-        <?php elseif (isset($error_message)): ?>
-            <p class="text-red-500 mb-4"><?php echo $error_message; ?></p>
+        <h1 class="text-4xl font-bold mb-4">Posts de <?php echo htmlspecialchars($topic['name']); ?></h1>
+        <?php if (!empty($posts)): ?>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <?php foreach ($posts as $post): ?>
+                    <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+                        <?php if ($post['image_url']): ?>
+                            <img src="/<?php echo htmlspecialchars($post['image_url']); ?>" alt="Post Image" class="mb-4 rounded-lg h-32 w-full object-cover">
+                        <?php endif; ?>
+                        <h3 class="text-xl font-bold mb-2"><?php echo htmlspecialchars($post['title']); ?></h3>
+                        <p class="text-gray-400 mb-4"><?php echo nl2br(htmlspecialchars(substr($post['content'], 0, 100))); ?>...</p>
+                        <a href="/2DAW/m7blog/app/views/post/details.php?post_id=<?php echo $post['id']; ?>" class="text-blue-500 hover:underline">Leer más</a>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        <?php else: ?>
+            <p>No hay posts disponibles en este tema.</p>
         <?php endif; ?>
-        <form method="post" action="" class="bg-gray-800 p-6 rounded-lg shadow-lg">
-            <div class="mb-4">
-                <label for="username" class="block text-sm font-medium text-gray-300">Nombre de usuario:</label>
-                <input type="text" id="username" name="username" class="mt-1 p-2 w-full bg-gray-700 text-white rounded-md" value="<?php echo htmlspecialchars($_SESSION['user']['username']); ?>" required>
-            </div>
-            <div class="mb-4">
-                <label for="email" class="block text-sm font-medium text-gray-300">Correo electrónico:</label>
-                <input type="email" id="email" name="email" class="mt-1 p-2 w-full bg-gray-700 text-white rounded-md" value="<?php echo htmlspecialchars($_SESSION['user']['email']); ?>">
-            </div>
-            <div class="flex justify-end">
-                <input type="submit" value="Actualizar perfil" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
-            </div>
-        </form>
     </div>
 </body>
 </html>

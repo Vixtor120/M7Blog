@@ -32,6 +32,10 @@
                 <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white p-2 rounded">
                     Registrarse
                 </button>
+
+                <?php if (isset($success_message)): ?>
+                    <p class="mt-4 text-center text-green-500"><?php echo $success_message; ?></p>
+                <?php endif; ?>
             </form>
 
             <p class="mt-4 text-center text-gray-400">

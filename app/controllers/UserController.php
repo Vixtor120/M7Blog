@@ -41,5 +41,9 @@ class UserController {
     public function getAllUsers() {
         return $this->userModel->getAll();
     }
+
+    public function updateProfile($userId, $username, $email) {
+        return $this->userModel->update($userId, $username, $email);
+    }
 }
 ?>

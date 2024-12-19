@@ -20,7 +20,9 @@ $commentController = new \controllers\CommentController($commentModel);
 
 if (isset($_GET['post_id'])) {
     $post = $postController->getPostById($_GET['post_id']);
-    $comments = $commentModel->getCommentsByPostId($_GET['post_id']);
+    if ($post) {
+        $comments = $commentModel->getCommentsByPostId($_GET['post_id']);
+    }
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['comment'])) {
@@ -46,6 +48,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_comment'])) {
     }
 }
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['like_post'])) {
+    if (Auth::isLoggedIn()) {
+        $user_id = $_SESSION['user']['id'];
+        if ($postController->hasUserLikedPost($_GET['post_id'], $user_id)) {
+            $postController->decrementLikes($_GET['post_id'], $user_id);
+        } else {
+            $postController->incrementLikes($_GET['post_id'], $user_id);
+        }
+        header("Location: details.php?post_id=" . $_GET['post_id']);
+        exit();
+    } else {
+        header("Location: ../auth/login.php");
+        exit();
+    }
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['like_comment'])) {
+    if (Auth::isLoggedIn()) {
+        $user_id = $_SESSION['user']['id'];
+        if ($commentController->hasUserLikedComment($_POST['comment_id'], $user_id)) {
+            $commentController->decrementLikes($_POST['comment_id'], $user_id);
+        } else {
+            $commentController->incrementLikes($_POST['comment_id'], $user_id);
+        }
+        header("Location: details.php?post_id=" . $_GET['post_id']);
+        exit();
+    } else {
+        header("Location: ../auth/login.php");
+        exit();
+    }
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_post'])) {
+    if (Auth::isLoggedIn()) {
+        $postController->deletePost($_GET['post_id'], $_SESSION['user']['id']);
+        header("Location: ../home/index.php");
+        exit();
+    } else {
+        header("Location: ../auth/login.php");
+        exit();
+    }
+}
+
 function displayComments($comments, $parent_id = null, $level = 0) {
     foreach ($comments as $comment) {
         if ($comment['parent_id'] == $parent_id) {
@@ -56,21 +101,26 @@ function displayComments($comments, $parent_id = null, $level = 0) {
             }
             echo '</small>';
             echo '<p class="mt-2">' . htmlspecialchars($comment['content']) . '</p>';
+            echo '<form method="POST" action="" class="inline">';
+            echo '<input type="hidden" name="comment_id" value="' . $comment['id'] . '">';
+            echo '<button type="submit" name="like_comment" class="text-blue-500 hover:underline"><i class="fas fa-heart"></i> Me gusta (' . htmlspecialchars($comment['likes']) . ')</button>';
+            echo '</form>';
             if (isset($_SESSION['user']) && $_SESSION['user']['id'] == $comment['user_id']) {
                 echo '<form method="POST" action="" class="inline">';
                 echo '<input type="hidden" name="comment_id" value="' . $comment['id'] . '">';
                 echo '<button type="submit" name="delete_comment" class="text-red-500 hover:underline">Eliminar</button>';
                 echo '</form>';
             }
-            echo '<a href="#reply-' . $comment['id'] . '" class="text-blue-500 hover:underline ml-4">Responder</a>';
+            echo '<a href="#reply-' . $comment['id'] . '" class="text-blue-500 hover:underline ml-4"><i class="fas fa-reply"></i> Responder</a>';
             echo '<form id="reply-' . $comment['id'] . '" method="POST" action="" class="mt-2 hidden">';
+            echo '<h3 class="text-xl font-bold mb-2">Responder Comentario</h3>';
             echo '<input type="hidden" name="parent_id" value="' . $comment['id'] . '">';
-            echo '<textarea name="content" class="mt-1 p-2 w-full bg-gray-700 text-white rounded-md" required></textarea>';
+            echo '<textarea name="content" class="mt-1 p-2 w-full bg-gray-600 text-white rounded-md" required></textarea>';
             echo '<div class="flex justify-end">';
             echo '<button type="submit" name="comment" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">Responder</button>';
             echo '</div>';
             echo '</form>';
-            echo '<a href="#replies-' . $comment['id'] . '" class="text-blue-500 hover:underline ml-4 toggle-replies">Ver respuestas</a>';
+            echo '<a href="#replies-' . $comment['id'] . '" class="text-blue-500 hover:underline ml-4 toggle-replies" data-replies-count="' . htmlspecialchars($comment['replies_count']) . '"><i class="fas fa-comments"></i> Ver respuestas (' . htmlspecialchars($comment['replies_count']) . ')</a>';
             echo '<ul id="replies-' . $comment['id'] . '" class="hidden">';
             displayComments($comments, $comment['id'], $level + 1);
             echo '</ul>';
@@ -86,6 +136,7 @@ function displayComments($comments, $parent_id = null, $level = 0) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Detalles del Post</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             document.querySelectorAll('a[href^="#reply-"]').forEach(function(replyLink) {
@@ -106,7 +157,11 @@ function displayComments($comments, $parent_id = null, $level = 0) {
                     var replies = document.getElementById(repliesId);
                     if (replies) {
                         replies.classList.toggle('hidden');
-                        this.textContent = replies.classList.contains('hidden') ? 'Ver respuestas' : 'Ocultar respuestas';
+                        if (replies.classList.contains('hidden')) {
+                            this.innerHTML = '<i class="fas fa-comments"></i> Ver respuestas (' + this.getAttribute('data-replies-count') + ')';
+                        } else {
+                            this.innerHTML = '<i class="fas fa-comments"></i> Ocultar respuestas (' + this.getAttribute('data-replies-count') + ')';
+                        }
                     }
                 });
             });
@@ -135,11 +190,25 @@ function displayComments($comments, $parent_id = null, $level = 0) {
             </ul>
         </nav>
 
-        <?php if (isset($post)): ?>
+        <?php if (isset($post) && $post): ?>
             <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
                 <h1 class="text-4xl font-bold mb-4"><?php echo htmlspecialchars($post['title']); ?></h1>
+                <?php if ($post['image_url']): ?>
+                    <img src="/<?php echo htmlspecialchars($post['image_url']); ?>" alt="Post Image" class="mb-4 rounded-lg h-64 w-full object-cover">
+                <?php endif; ?>
                 <p class="mb-4"><?php echo nl2br(htmlspecialchars($post['content'])); ?></p>
                 <small class="block text-gray-400">Escrito por: <?php echo htmlspecialchars($post['author']); ?> el <?php echo htmlspecialchars($post['created_at']); ?></small>
+                <form method="POST" action="">
+                    <button type="submit" name="like_post" class="text-blue-500 hover:underline">
+                        <i class="fas fa-heart"></i> Me gusta (<?php echo htmlspecialchars($post['likes']); ?>)
+                    </button>
+                </form>
+                <?php if (isset($_SESSION['user']) && $_SESSION['user']['id'] == $post['author_id']): ?>
+                    <a href="edit.php?post_id=<?php echo $post['id']; ?>" class="text-blue-500 hover:underline">Editar Post</a>
+                    <form method="POST" action="" class="inline">
+                        <button type="submit" name="delete_post" class="text-red-500 hover:underline">Eliminar Post</button>
+                    </form>
+                <?php endif; ?>
             </div>
 
             <div class="bg-gray-800 p-6 rounded-lg shadow-lg mt-6">
@@ -156,7 +225,7 @@ function displayComments($comments, $parent_id = null, $level = 0) {
                     <form method="POST" action="">
                         <div class="mb-4">
                             <label for="content" class="block text-sm font-medium text-gray-300">Añadir un comentario:</label>
-                            <textarea id="content" name="content" class="mt-1 p-2 w-full bg-gray-700 text-white rounded-md" required></textarea>
+                            <textarea id="content" name="content" class="mt-1 p-2 w-full bg-gray-600 text-white rounded-md" required></textarea>
                         </div>
                         <div class="flex justify-end">
                             <button type="submit" name="comment" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">Comentar</button>
