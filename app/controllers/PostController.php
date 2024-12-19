@@ -49,5 +49,9 @@ class PostController {
     public function getPostsByTopicId($topicId) {
         return $this->postModel->getPostsByTopicId($topicId);
     }
+
+    public function getPostsByUserId($userId) {
+        return $this->postModel->getPostsByUserId($userId);
+    }
 }
 ?>

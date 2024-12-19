@@ -101,6 +101,3 @@ if (Auth::isLoggedIn()) {
     require 'views/auth/login.php';
 }
 ?>
-<ul class="flex space-x-4">
-    <li><a href="/2DAW/m7blog/app/views/help/contact.php" class="text-white hover:text-gray-300">Contactar</a></li>
-</ul>

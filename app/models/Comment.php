@@ -48,6 +48,14 @@ class Comment {
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 
+    public function getCommentsByUserId($userId) {
+        $query = "SELECT * FROM " . $this->table . " WHERE user_id = :userId ORDER BY created_at DESC";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':userId', $userId);
+        $stmt->execute();
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
+
     public function delete($comment_id, $user_id) {
         $this->conn->beginTransaction();
         try {

@@ -51,46 +51,52 @@ $topics = $topicController->getAllTopics();
             </ul>
         </nav>
 
-        <h1 class="text-4xl font-bold mb-4">
-            Bienvenido al Blog de Videojuegos
-            <?php if (isset($_SESSION['user'])): ?>
-                , <?php echo htmlspecialchars($_SESSION['user']['username']); ?>
-            <?php endif; ?>
-        </h1>
-        <p class="mb-6">Esta es la página principal del blog de videojuegos.</p>
+        <div class="flex">
+            <div class="w-full lg:w-3/4">
+                <h1 class="text-4xl font-bold mb-4">
+                    Bienvenido al Blog de Videojuegos
+                    <?php if (isset($_SESSION['user'])): ?>
+                        , <?php echo htmlspecialchars($_SESSION['user']['username']); ?>
+                    <?php endif; ?>
+                </h1>
+                <p class="mb-6">Esta es la página principal del blog de videojuegos.</p>
 
-        <h2 class="text-2xl font-bold mb-4">Posts Recientes</h2>
-        <?php if (!empty($posts)): ?>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <?php foreach ($posts as $post): ?>
-                    <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
-                        <?php if ($post['image_url']): ?>
-                            <img src="/<?php echo htmlspecialchars($post['image_url']); ?>" alt="Post Image" class="mb-4 rounded-lg h-32 w-full object-cover">
-                        <?php endif; ?>
-                        <h3 class="text-xl font-bold mb-2"><?php echo htmlspecialchars($post['title']); ?></h3>
-                        <p class="text-gray-400 mb-4"><?php echo nl2br(htmlspecialchars(substr($post['content'], 0, 100))); ?>...</p>
-                        <a href="/2DAW/m7blog/app/views/post/details.php?post_id=<?php echo $post['id']; ?>" class="text-blue-500 hover:underline">Leer más</a>
+                <h2 class="text-2xl font-bold mb-4">Posts Recientes</h2>
+                <?php if (!empty($posts)): ?>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <?php foreach ($posts as $post): ?>
+                            <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+                                <?php if ($post['image_url']): ?>
+                                    <img src="/<?php echo htmlspecialchars($post['image_url']); ?>" alt="Post Image" class="mb-4 rounded-lg h-32 w-full object-cover">
+                                <?php endif; ?>
+                                <h3 class="text-xl font-bold mb-2"><?php echo htmlspecialchars($post['title']); ?></h3>
+                                <p class="text-gray-400 mb-4"><?php echo nl2br(htmlspecialchars(substr($post['content'], 0, 100))); ?>...</p>
+                                <a href="/2DAW/m7blog/app/views/post/details.php?post_id=<?php echo $post['id']; ?>" class="text-blue-500 hover:underline">Leer más</a>
+                            </div>
+                        <?php endforeach; ?>
                     </div>
-                <?php endforeach; ?>
+                <?php else: ?>
+                    <p>No hay posts disponibles.</p>
+                <?php endif; ?>
             </div>
-        <?php else: ?>
-            <p>No hay posts disponibles.</p>
-        <?php endif; ?>
 
-        <h2 class="text-2xl font-bold mt-8 mb-4">Temas</h2>
-        <?php if (!empty($topics)): ?>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <?php foreach ($topics as $topic): ?>
-                    <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
-                        <h3 class="text-xl font-bold mb-2"><?php echo htmlspecialchars($topic['name']); ?></h3>
-                        <p class="text-gray-400 mb-4"><?php echo nl2br(htmlspecialchars($topic['description'])); ?></p>
-                        <a href="/2DAW/m7blog/app/views/topic/posts.php?topic_id=<?php echo $topic['id']; ?>" class="text-blue-500 hover:underline">Ver posts</a>
+            <div class="w-full lg:w-1/4 lg:pl-6">
+                <h2 class="text-2xl font-bold mb-4">Temas</h2>
+                <?php if (!empty($topics)): ?>
+                    <div class="grid grid-cols-1 gap-6">
+                        <?php foreach ($topics as $topic): ?>
+                            <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+                                <h3 class="text-xl font-bold mb-2"><?php echo htmlspecialchars($topic['name']); ?></h3>
+                                <p class="text-gray-400 mb-4"><?php echo nl2br(htmlspecialchars($topic['description'])); ?></p>
+                                <a href="/2DAW/m7blog/app/views/topic/posts.php?topic_id=<?php echo $topic['id']; ?>" class="text-blue-500 hover:underline">Ver posts</a>
+                            </div>
+                        <?php endforeach; ?>
                     </div>
-                <?php endforeach; ?>
+                <?php else: ?>
+                    <p>No hay temas disponibles.</p>
+                <?php endif; ?>
             </div>
-        <?php else: ?>
-            <p>No hay temas disponibles.</p>
-        <?php endif; ?>
+        </div>
     </div>
     <?php if (isset($_SESSION['user'])): ?>
         <script>

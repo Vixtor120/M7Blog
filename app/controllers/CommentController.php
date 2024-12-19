@@ -37,4 +37,8 @@ class CommentController {
     public function getRepliesCount($id) {
         return $this->commentModel->getRepliesCount($id);
     }
+
+    public function getCommentsByUserId($userId) {
+        return $this->commentModel->getCommentsByUserId($userId);
+    }
 }

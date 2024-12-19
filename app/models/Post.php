@@ -133,5 +133,13 @@ class Post {
         $stmt->bindParam(':author_id', $author_id);
         return $stmt->execute();
     }
+
+    public function getPostsByUserId($userId) {
+        $query = "SELECT * FROM " . $this->table_name . " WHERE author_id = :userId";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':userId', $userId);
+        $stmt->execute();
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
 }
 ?>
