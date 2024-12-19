@@ -64,5 +64,28 @@ class User {
         $stmt->bindParam(':id', $userId);
         return $stmt->execute();
     }
+
+    public function updateRole($user_id, $role) {
+        $query = "UPDATE " . $this->table . " SET role = :role WHERE id = :user_id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':role', $role);
+        $stmt->bindParam(':user_id', $user_id);
+        return $stmt->execute();
+    }
+
+    public function delete($userId) {
+        $query = 'DELETE FROM ' . $this->table . ' WHERE id = :id';
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':id', $userId);
+        return $stmt->execute();
+    }
+
+    public function findById($id) {
+        $query = "SELECT * FROM " . $this->table . " WHERE id = :id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':id', $id);
+        $stmt->execute();
+        return $stmt->fetch(\PDO::FETCH_ASSOC);
+    }
 }
 ?>

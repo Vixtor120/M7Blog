@@ -45,5 +45,17 @@ class UserController {
     public function updateProfile($userId, $username, $email) {
         return $this->userModel->update($userId, $username, $email);
     }
+
+    public function updateUserRole($user_id, $role) {
+        return $this->userModel->updateRole($user_id, $role);
+    }
+
+    public function deleteUser($userId) {
+        return $this->userModel->delete($userId);
+    }
+
+    public function getUserById($id) {
+        return $this->userModel->findById($id);
+    }
 }
 ?>

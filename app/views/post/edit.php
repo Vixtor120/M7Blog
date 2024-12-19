@@ -124,6 +124,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <button type="submit" name="action" value="update_post" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">Actualizar Post</button>
             </div>
         </form>
+        <a href="/2DAW/m7blog/app/views/post/delete.php?post_id=<?php echo $post['id']; ?>" class="text-red-500 hover:underline" onclick="return confirm('¿Está seguro de que desea borrar este post?');">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6h18M9 6v12m6-12v12M4 6l1 14a2 2 0 002 2h10a2 2 0 002-2l1-14M10 6V4a2 2 0 012-2h0a2 2 0 012 2v2" />
+            </svg>
+        </a>
     </div>
 </body>
 </html>

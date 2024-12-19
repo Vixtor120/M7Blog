@@ -105,10 +105,14 @@ function displayComments($comments, $parent_id = null, $level = 0) {
             echo '<input type="hidden" name="comment_id" value="' . $comment['id'] . '">';
             echo '<button type="submit" name="like_comment" class="text-blue-500 hover:underline"><i class="fas fa-heart"></i> Me gusta (' . htmlspecialchars($comment['likes']) . ')</button>';
             echo '</form>';
-            if (isset($_SESSION['user']) && $_SESSION['user']['id'] == $comment['user_id']) {
+            if (isset($_SESSION['user']) && ($_SESSION['user']['id'] == $comment['user_id'] || $_SESSION['user']['role'] === 'admin')) {
                 echo '<form method="POST" action="" class="inline">';
                 echo '<input type="hidden" name="comment_id" value="' . $comment['id'] . '">';
-                echo '<button type="submit" name="delete_comment" class="text-red-500 hover:underline">Eliminar</button>';
+                echo '<button type="submit" name="delete_comment" class="text-red-500 hover:underline">';
+                echo '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">';
+                echo '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6h18M9 6v12m6-12v12M4 6l1 14a2 2 0 002 2h10a2 2 0 002-2l1-14M10 6V4a2 2 0 012-2h0a2 2 0 012 2v2" />';
+                echo '</svg>';
+                echo '</button>';
                 echo '</form>';
             }
             echo '<a href="#reply-' . $comment['id'] . '" class="text-blue-500 hover:underline ml-4"><i class="fas fa-reply"></i> Responder</a>';
@@ -204,10 +208,14 @@ function displayComments($comments, $parent_id = null, $level = 0) {
                         <i class="fas fa-heart"></i> Me gusta (<?php echo htmlspecialchars($post['likes']); ?>)
                     </button>
                 </form>
-                <?php if (isset($_SESSION['user']) && $_SESSION['user']['id'] == $post['author_id']): ?>
+                <?php if (isset($_SESSION['user']) && ($_SESSION['user']['id'] == $post['author_id'] || $_SESSION['user']['role'] === 'admin')): ?>
                     <a href="edit.php?post_id=<?php echo $post['id']; ?>" class="text-blue-500 hover:underline">Editar Post</a>
                     <form method="POST" action="" class="inline">
-                        <button type="submit" name="delete_post" class="text-red-500 hover:underline">Eliminar Post</button>
+                        <button type="submit" name="delete_post" class="text-red-500 hover:underline">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6h18M9 6v12m6-12v12M4 6l1 14a2 2 0 002 2h10a2 2 0 002-2l1-14M10 6V4a2 2 0 012-2h0a2 2 0 012 2v2" />
+                            </svg>
+                        </button>
                     </form>
                 <?php endif; ?>
             </div>

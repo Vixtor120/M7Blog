@@ -77,7 +77,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
 <body class="bg-gray-900 text-white">
-    <div class="container mx-auto p-4">
+    <style>
+        .background-image {
+            background-image: url('/2DAW/m7blog/app/public/img/background.png');
+            background-size: cover;
+            background-position: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+    </style>
+    <div class="background-image"></div>
+    <div class="relative z-10 container mx-auto p-4 bg-gray-900 bg-opacity-85">
         <nav class="flex items-center justify-between mb-6 p-4 bg-gray-700 rounded-lg shadow-lg">
             <div class="flex items-center space-x-4">
                 <img src="/2DAW/m7blog/app/public/img/logo.png" alt="Logo" class="h-10">
@@ -133,6 +147,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <button type="submit" name="action" value="create_post" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">Crear Post</button>
             </div>
         </form>
+        <div class="mt-4 text-sm text-gray-400">
+            <p>Autor: <?php echo htmlspecialchars($_SESSION['user']['username']); ?></p>
+            <p>Fecha: <?php echo date('Y-m-d H:i:s'); ?></p>
+        </div>
     </div>
+    <?php if (isset($_SESSION['user'])): ?>
+        <script>
+            console.log("Usuario logueado: <?php echo htmlspecialchars($_SESSION['user']['username']); ?>");
+            console.log("Rol del usuario: <?php echo htmlspecialchars($_SESSION['user']['role']); ?>");
+        </script>
+    <?php endif; ?>
 </body>
 </html>
