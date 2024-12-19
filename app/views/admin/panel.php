@@ -1,11 +1,11 @@
 <?php
-require_once __DIR__ . '/../../config/Database.php';
-require_once __DIR__ . '/../../models/User.php';
-require_once __DIR__ . '/../../controllers/UserController.php';
-require_once __DIR__ . '/../../utils/Auth.php';
+require_once __DIR__ . '\\..\\..\\config\\Database.php';
+require_once __DIR__ . '\\..\\..\\models\\User.php';
+require_once __DIR__ . '\\..\\..\\controllers\\UserController.php';
+require_once __DIR__ . '\\..\\..\\utils\\Auth.php';
 
 use config\Database;
-use controllers\UserController;
+use controllers\UserController; // Ensure this line is included
 use models\User;
 use utils\Auth;
 
@@ -44,9 +44,11 @@ $users = $userController->getAllUsers();
                     <?php endif; ?>
                     <?php if ($_SESSION['user']['role'] === 'admin'): ?>
                         <li><a href="/2DAW/m7blog/app/views/admin/panel.php" class="text-white hover:text-gray-300">Panel de Control</a></li>
+                        <li><a href="/2DAW/m7blog/app/views/admin/help_tickets.php" class="text-white hover:text-gray-300">Tickets de Ayuda</a></li>
                     <?php endif; ?>
                     <li><a href="/2DAW/m7blog/app/views/auth/logout.php" class="text-white hover:text-gray-300">Cerrar sesión</a></li>
                 <?php endif; ?>
+                <li><a href="/2DAW/m7blog/app/views/help/contact.php" class="text-white hover:text-gray-300">Contactar</a></li>
             </ul>
         </nav>
 

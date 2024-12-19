@@ -2,12 +2,12 @@
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
-require_once '../../config/Database.php';
-require_once '../../models/Post.php';
-require_once '../../controllers/PostController.php';
-require_once '../../models/Comment.php';
-require_once '../../controllers/CommentController.php';
-require_once '../../utils/Auth.php';
+require_once __DIR__ . '\\..\\..\\config\\Database.php';
+require_once __DIR__ . '\\..\\..\\models\\Post.php';
+require_once __DIR__ . '\\..\\..\\controllers\\PostController.php';
+require_once __DIR__ . '\\..\\..\\models\\Comment.php';
+require_once __DIR__ . '\\..\\..\\controllers\\CommentController.php';
+require_once __DIR__ . '\\..\\..\\utils\\Auth.php';
 
 use config\Database;
 use utils\Auth;
@@ -187,6 +187,7 @@ function displayComments($comments, $parent_id = null, $level = 0) {
                     <?php endif; ?>
                     <li><a href="/2DAW/m7blog/app/views/auth/logout.php" class="text-white hover:text-gray-300">Cerrar sesión</a></li>
                 <?php endif; ?>
+                <li><a href="/2DAW/m7blog/app/views/help/contact.php" class="text-white hover:text-gray-300">Contactar</a></li>
             </ul>
         </nav>
 

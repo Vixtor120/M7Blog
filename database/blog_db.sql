@@ -126,6 +126,21 @@ INSERT INTO `users` (`id`, `username`, `email`, `password`, `role`, `created_at`
 (1, 'user', 'user@gmail.com', '$2y$10$3ICGzcuHXxVqdgvQg5o.j.LdnaJ0al72nLDu6UG8ApUi4chGVQXUW', 'subscriber', '2024-12-19 11:09:51'),
 (4, 'admin', 'admin@example.com', '$2y$10$e2EzgxVON69tvwwTRTxXM.4HXOARhDY2c1ckc4WYDvEyzoxzG2vU6', 'admin', '2024-12-19 11:16:35');
 
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `help_tickets`
+--
+
+CREATE TABLE `help_tickets` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `subject` varchar(255) NOT NULL,
+  `message` text NOT NULL,
+  `status` enum('open','resolved') NOT NULL DEFAULT 'open',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 --
 -- Índices para tablas volcadas
 --
@@ -142,9 +157,7 @@ ALTER TABLE `comments`
 -- Indices de la tabla `comment_likes`
 --
 ALTER TABLE `comment_likes`
-  ADD PRIMARY KEY (`comment_id`,`user_id`),
-  ADD KEY `idx_comment_likes_comment_id` (`comment_id`),
-  ADD KEY `idx_comment_likes_user_id` (`user_id`);
+  ADD PRIMARY KEY (`comment_id`,`user_id`);
 
 --
 -- Indices de la tabla `posts`
@@ -158,9 +171,7 @@ ALTER TABLE `posts`
 -- Indices de la tabla `post_likes`
 --
 ALTER TABLE `post_likes`
-  ADD PRIMARY KEY (`post_id`,`user_id`),
-  ADD KEY `idx_post_likes_post_id` (`post_id`),
-  ADD KEY `idx_post_likes_user_id` (`user_id`);
+  ADD PRIMARY KEY (`post_id`,`user_id`);
 
 --
 -- Indices de la tabla `topics`
@@ -175,6 +186,13 @@ ALTER TABLE `topics`
 ALTER TABLE `users`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `idx_users_email` (`email`);
+
+--
+-- Indices de la tabla `help_tickets`
+--
+ALTER TABLE `help_tickets`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_help_tickets_user_id` (`user_id`);
 
 --
 -- AUTO_INCREMENT de las tablas volcadas
@@ -203,6 +221,12 @@ ALTER TABLE `topics`
 --
 ALTER TABLE `users`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- AUTO_INCREMENT de la tabla `help_tickets`
+--
+ALTER TABLE `help_tickets`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;
 
 --
 -- Restricciones para tablas volcadas
@@ -235,6 +259,12 @@ ALTER TABLE `posts`
 ALTER TABLE `post_likes`
   ADD CONSTRAINT `post_likes_ibfk_1` FOREIGN KEY (`post_id`) REFERENCES `posts` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `post_likes_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Filtros para la tabla `help_tickets`
+--
+ALTER TABLE `help_tickets`
+  ADD CONSTRAINT `help_tickets_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

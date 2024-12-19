@@ -1,13 +1,13 @@
 <?php
 session_start();
-require_once __DIR__ . '/config/Database.php';
-require_once __DIR__ . '/models/User.php';
-require_once __DIR__ . '/controllers/UserController.php';
-require_once __DIR__ . '/utils/Auth.php';
-require_once __DIR__ . '/models/Post.php';
-require_once __DIR__ . '/controllers/PostController.php';
-require_once __DIR__ . '/models/Comment.php';
-require_once __DIR__ . '/controllers/CommentController.php';
+require_once __DIR__ . '\\config\\Database.php';
+require_once __DIR__ . '\\models\\User.php';
+require_once __DIR__ . '\\controllers\\UserController.php';
+require_once __DIR__ . '\\utils\\Auth.php';
+require_once __DIR__ . '\\models\\Post.php';
+require_once __DIR__ . '\\controllers\\PostController.php';
+require_once __DIR__ . '\\models\\Comment.php';
+require_once __DIR__ . '\\controllers\\CommentController.php';
 
 use config\Database;
 use models\User;
@@ -101,3 +101,6 @@ if (Auth::isLoggedIn()) {
     require 'views/auth/login.php';
 }
 ?>
+<ul class="flex space-x-4">
+    <li><a href="/2DAW/m7blog/app/views/help/contact.php" class="text-white hover:text-gray-300">Contactar</a></li>
+</ul>

@@ -3,23 +3,29 @@ if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 require_once __DIR__ . '\\..\\..\\config\\Database.php';
-require_once __DIR__ . '\\..\\..\\models\\User.php';
-require_once __DIR__ . '\\..\\..\\controllers\\UserController.php';
+require_once __DIR__ . '\\..\\..\\models\\HelpTicket.php';
+require_once __DIR__ . '\\..\\..\\controllers\\HelpTicketController.php'; // Ensure this line is included
+require_once __DIR__ . '\\..\\..\\utils\\Auth.php';
 
 use config\Database;
+use models\HelpTicket;
+use controllers\HelpTicketController; // Ensure this line is included
+use utils\Auth;
 
 $db = new Database();
-$userModel = new \models\User($db->getConnection());
-$userController = new \controllers\UserController($userModel);
+$helpTicketModel = new HelpTicket($db->getConnection());
+$helpTicketController = new HelpTicketController($helpTicketModel);
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $updated = $userController->updateProfile($_SESSION['user']['id'], $_POST['username'], $_POST['email']);
-    if ($updated) {
-        $_SESSION['user']['username'] = $_POST['username'];
-        $_SESSION['user']['email'] = $_POST['email'];
-        $success_message = "Perfil actualizado correctamente.";
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['subject']) && isset($_POST['message'])) {
+    if (Auth::isLoggedIn()) {
+        $user_id = $_SESSION['user']['id'];
+        $subject = $_POST['subject'];
+        $message = $_POST['message'];
+        $helpTicketController->createTicket($user_id, $subject, $message);
+        $success_message = "Ticket de ayuda enviado correctamente.";
     } else {
-        $error_message = "Error al actualizar el perfil.";
+        header('Location: ../auth/login.php');
+        exit();
     }
 }
 ?>
@@ -29,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Perfil de Usuario</title>
+    <title>Contactar con el Administrador</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
 <body class="bg-gray-900 text-white">
@@ -43,19 +49,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <li><a href="/2DAW/m7blog/app/views/home/index.php" class="text-white hover:text-gray-300">Inicio</a></li>
                 <?php if (isset($_SESSION['user'])): ?>
                     <li><a href="/2DAW/m7blog/app/views/user/profile.php" class="text-white hover:text-gray-300">Perfil</a></li>
+                    <li><a href="/2DAW/m7blog/app/views/help/contact.php" class="text-white hover:text-gray-300">Contactar</a></li>
                     <?php if ($_SESSION['user']['role'] === 'admin' || $_SESSION['user']['role'] === 'writer'): ?>
                         <li><a href="/2DAW/m7blog/app/views/post/create.php" class="text-white hover:text-gray-300">Crear Post</a></li>
                     <?php endif; ?>
                     <?php if ($_SESSION['user']['role'] === 'admin'): ?>
                         <li><a href="/2DAW/m7blog/app/views/admin/panel.php" class="text-white hover:text-gray-300">Panel de Control</a></li>
+                        <li><a href="/2DAW/m7blog/app/views/admin/help_tickets.php" class="text-white hover:text-gray-300">Tickets de Ayuda</a></li>
                     <?php endif; ?>
                     <li><a href="/2DAW/m7blog/app/views/auth/logout.php" class="text-white hover:text-gray-300">Cerrar sesión</a></li>
                 <?php endif; ?>
-                <li><a href="/2DAW/m7blog/app/views/help/contact.php" class="text-white hover:text-gray-300">Contactar</a></li>
             </ul>
         </nav>
 
-        <h1 class="text-4xl font-bold mb-4">Perfil de Usuario</h1>
+        <h1 class="text-4xl font-bold mb-4">Contactar con el Administrador</h1>
         <?php if (isset($success_message)): ?>
             <p class="text-green-500 mb-4"><?php echo $success_message; ?></p>
         <?php elseif (isset($error_message)): ?>
@@ -63,15 +70,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php endif; ?>
         <form method="post" action="" class="bg-gray-800 p-6 rounded-lg shadow-lg">
             <div class="mb-4">
-                <label for="username" class="block text-sm font-medium text-gray-300">Nombre de usuario:</label>
-                <input type="text" id="username" name="username" class="mt-1 p-2 w-full bg-gray-700 text-white rounded-md" value="<?php echo htmlspecialchars($_SESSION['user']['username']); ?>" required>
+                <label for="subject" class="block text-sm font-medium text-gray-300">Asunto:</label>
+                <input type="text" id="subject" name="subject" class="mt-1 p-2 w-full bg-gray-700 text-white rounded-md" required>
             </div>
             <div class="mb-4">
-                <label for="email" class="block text-sm font-medium text-gray-300">Correo electrónico:</label>
-                <input type="email" id="email" name="email" class="mt-1 p-2 w-full bg-gray-700 text-white rounded-md" value="<?php echo htmlspecialchars($_SESSION['user']['email']); ?>">
+                <label for="message" class="block text-sm font-medium text-gray-300">Mensaje:</label>
+                <textarea id="message" name="message" class="mt-1 p-2 w-full bg-gray-700 text-white rounded-md" required></textarea>
             </div>
             <div class="flex justify-end">
-                <input type="submit" value="Actualizar perfil" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+                <input type="submit" value="Enviar" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
             </div>
         </form>
     </div>
