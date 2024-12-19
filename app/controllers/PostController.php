@@ -26,8 +26,8 @@ class PostController {
         return $this->postModel->update($id, $title, $content, $topic_id, $image_url);
     }
 
-    public function deletePost($id, $author_id) {
-        return $this->postModel->delete($id, $author_id);
+    public function deletePost($postId, $author_id) {
+        return $this->postModel->delete($postId, $author_id);
     }
 
     public function incrementLikes($post_id, $user_id) {

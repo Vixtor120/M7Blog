@@ -23,8 +23,8 @@ $postController = new PostController($postModel);
 $posts = $postController->getAllPosts();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['delete_post_id'])) {
-        $postController->deletePost($_POST['delete_post_id']);
+    if (isset($_POST['delete_post_id']) && isset($_POST['author_id'])) {
+        $postController->deletePost($_POST['delete_post_id'], $_POST['author_id']);
         header('Location: posts.php');
         exit();
     }
@@ -108,6 +108,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <td class="px-4 py-2">
                                 <form method="POST" action="" style="display:inline;">
                                     <input type="hidden" name="delete_post_id" value="<?php echo $post['id']; ?>">
+                                    <input type="hidden" name="author_id" value="<?php echo $post['author_id']; ?>">
                                     <button type="submit" class="delete-btn" onclick="return confirm('¿Está seguro de que desea borrar este post?');">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                             <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H3a1 1 0 100 2h1v9a2 2 0 002 2h8a2 2 0 002-2V6h1a1 1 0 100-2h-2V3a1 1 0 00-1-1H6zm3 3a1 1 0 112 0v1h-2V5zm-3 3a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd" />
