@@ -79,8 +79,6 @@ usort($allPostsSortedByLikes, function($a, $b) {
                         , <?php echo htmlspecialchars($_SESSION['user']['username']); ?>
                     <?php endif; ?>
                 </h1>
-                <p class="mb-6">Esta es la página principal del blog de videojuegos.</p>
-
                 <h2 class="text-2xl font-bold mb-4">Posts Recientes</h2>
                 <?php if (!empty($recentPosts)): ?>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

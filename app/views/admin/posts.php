@@ -3,13 +3,13 @@ if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 require_once __DIR__ . '\\..\\..\\config\\Database.php';
-require_once __DIR__ . '\\..\\..\\models\\User.php';
-require_once __DIR__ . '\\..\\..\\controllers\\UserController.php';
+require_once __DIR__ . '\\..\\..\\models\\Post.php';
+require_once __DIR__ . '\\..\\..\\controllers\\PostController.php';
 require_once __DIR__ . '\\..\\..\\utils\\Auth.php';
 
 use config\Database;
-use controllers\UserController;
-use models\User;
+use controllers\PostController;
+use models\Post;
 use utils\Auth;
 
 if (!Auth::isLoggedIn() || $_SESSION['user']['role'] !== 'admin') {
@@ -18,18 +18,14 @@ if (!Auth::isLoggedIn() || $_SESSION['user']['role'] !== 'admin') {
 }
 
 $db = new Database();
-$userModel = new User($db->getConnection());
-$userController = new UserController($userModel);
-$users = $userController->getAllUsers();
+$postModel = new Post($db->getConnection());
+$postController = new PostController($postModel);
+$posts = $postController->getAllPosts();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['user_id']) && isset($_POST['role'])) {
-        $userController->updateUserRole($_POST['user_id'], $_POST['role']);
-        header('Location: panel.php');
-        exit();
-    } elseif (isset($_POST['delete_user_id'])) {
-        $userController->deleteUser($_POST['delete_user_id']);
-        header('Location: panel.php');
+    if (isset($_POST['delete_post_id'])) {
+        $postController->deletePost($_POST['delete_post_id']);
+        header('Location: posts.php');
         exit();
     }
 }
@@ -40,25 +36,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Control</title>
+    <title>Controlar Posts</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <style>
-        .help-tickets-btn {
-            display: block;
-            background-color: #e3342f;
-            color: white;
-            padding: 0.25rem 0.5rem;
-            border-radius: 0.375rem;
-            text-decoration: none;
-            margin-top: 1rem;
-            text-align: right;
-            width: fit-content;
-            float: right;
-            margin: 5px;
-        }
-        .help-tickets-btn:hover {
-            background-color: #cc1f1a;
-        }
         .delete-btn {
             background-color: #e3342f;
             color: white;
@@ -105,43 +85,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <li><a href="/2DAW/m7blog/app/views/help/contact.php" class="text-white hover:text-gray-300">Contactar</a></li>
             </ul>
         </nav>
-        <a href="/2DAW/m7blog/app/views/admin/help_tickets.php" class="help-tickets-btn">Tickets de Ayuda</a>
-        <a href="/2DAW/m7blog/app/views/admin/posts.php" class="help-tickets-btn">Controlar Posts</a>
 
-        <h1 class="text-4xl font-bold mb-4">Panel de Control</h1>
-        <h2 class="text-2xl font-bold mb-4">Usuarios</h2>
+        <h1 class="text-4xl font-bold mb-4">Controlar Posts</h1>
         <div class="overflow-x-auto">
             <table class="min-w-full bg-gray-800 rounded-lg shadow-lg">
                 <thead>
                     <tr>
                         <th class="px-4 py-2 text-left text-gray-300">ID</th>
-                        <th class="px-4 py-2 text-left text-gray-300">Nombre de Usuario</th>
-                        <th class="px-4 py-2 text-left text-gray-300">Correo Electrónico</th>
-                        <th class="px-4 py-2 text-left text-gray-300">Rol</th>
+                        <th class="px-4 py-2 text-left text-gray-300">Título</th>
+                        <th class="px-4 py-2 text-left text-gray-300">Autor</th>
+                        <th class="px-4 py-2 text-left text-gray-300">Fecha</th>
                         <th class="px-4 py-2 text-left text-gray-300">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($users as $user): ?>
+                    <?php foreach ($posts as $post): ?>
                         <tr class="bg-gray-700">
-                            <td class="px-4 py-2"><?php echo htmlspecialchars($user['id']); ?></td>
-                            <td class="px-4 py-2"><?php echo htmlspecialchars($user['username']); ?></td>
-                            <td class="px-4 py-2"><?php echo htmlspecialchars($user['email']); ?></td>
+                            <td class="px-4 py-2"><?php echo htmlspecialchars($post['id']); ?></td>
+                            <td class="px-4 py-2"><?php echo htmlspecialchars($post['title']); ?></td>
+                            <td class="px-4 py-2"><?php echo htmlspecialchars($post['author'] ?? 'Desconocido'); ?></td>
+                            <td class="px-4 py-2"><?php echo htmlspecialchars($post['created_at']); ?></td>
                             <td class="px-4 py-2">
-                                <form method="POST" action="">
-                                    <input type="hidden" name="user_id" value="<?php echo $user['id']; ?>">
-                                    <select name="role" class="bg-gray-600 text-white rounded-md">
-                                        <option value="admin" <?php echo $user['role'] === 'admin' ? 'selected' : ''; ?>>Admin</option>
-                                        <option value="writer" <?php echo $user['role'] === 'writer' ? 'selected' : ''; ?>>Writer</option>
-                                        <option value="subscriber" <?php echo $user['role'] === 'subscriber' ? 'selected' : ''; ?>>Subscriber</option>
-                                    </select>
-                            </td>
-                            <td class="px-4 py-2">
-                                <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">Actualizar</button>
-                                </form>
                                 <form method="POST" action="" style="display:inline;">
-                                    <input type="hidden" name="delete_user_id" value="<?php echo $user['id']; ?>">
-                                    <button type="submit" class="delete-btn">
+                                    <input type="hidden" name="delete_post_id" value="<?php echo $post['id']; ?>">
+                                    <button type="submit" class="delete-btn" onclick="return confirm('¿Está seguro de que desea borrar este post?');">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                             <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H3a1 1 0 100 2h1v9a2 2 0 002 2h8a2 2 0 002-2V6h1a1 1 0 100-2h-2V3a1 1 0 00-1-1H6zm3 3a1 1 0 112 0v1h-2V5zm-3 3a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd" />
                                         </svg>

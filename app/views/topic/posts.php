@@ -70,6 +70,14 @@ if (isset($_GET['topic_id'])) {
                         <?php endif; ?>
                         <h3 class="text-xl font-bold mb-2"><?php echo htmlspecialchars($post['title']); ?></h3>
                         <p class="text-gray-400 mb-4"><?php echo nl2br(htmlspecialchars(substr($post['content'], 0, 100))); ?>...</p>
+                        <div class="flex items-center mb-4">
+                            <span class="text-red-500">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+                                </svg>
+                            </span>
+                            <span class="ml-2 text-gray-400"><?php echo $post['likes']; ?> likes</span>
+                        </div>
                         <a href="/2DAW/m7blog/app/views/post/details.php?post_id=<?php echo $post['id']; ?>" class="text-blue-500 hover:underline">Leer más</a>
                     </div>
                 <?php endforeach; ?>
